@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:temp/calendar_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,17 +40,22 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: EdgeInsets.zero,
           children: [
             const SizedBox(
-              height: 70,
+              height: 100,
               child: DrawerHeader(
                 decoration: BoxDecoration(
                   color: Colors.blue,
                 ),
-                child: Text('Menu'),
+                child: Text('Menu', style: TextStyle(color: Colors.white)),
               ),
             ),
             ListTile(
               title: const Text('Calendar'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (BuildContext context) => const CalendarPage()),
+                );
+              },
             ),
           ],
         ),
