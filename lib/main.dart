@@ -1,7 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:temp/calendar_page.dart';
 
-void main() {
+import 'event_model.dart';
+
+void main() async {
+  await Hive.initFlutter();
+  final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+  Hive.init(applicationDocumentDir.path);
+  Hive.registerAdapter(EventAdapter());
+  await Hive.openBox<List<Event>?>('Events'); // open/create events box
   runApp(const MyApp());
 }
 
@@ -28,10 +39,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (BuildContext context) => const CalendarPage()),
+                  MaterialPageRoute(builder: (BuildContext context) => CalendarPage()),
                 );
               },
             ),
