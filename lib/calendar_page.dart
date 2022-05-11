@@ -12,24 +12,39 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  late Box<List<Event>?> events;
+  late final Box<Event> box;
+  late List<Event> eventList;
   final DateFormat dayFormatter = DateFormat('E, dd MMM');
-  DateTime _focusedDay = DateTime.now();
+  late DateTime _focusedDay;
   DateTime? _selectedDay;
+  List<Event>? _selectedEvents;
 
   @override
   void initState() {
     super.initState();
     // get the previously opened user box
-    events = Hive.box('Events');
+    box = Hive.box<Event>('Events');
+    eventList = box.values.toList();
+    _focusedDay = DateTime.now();
+    _selectedDay = DateTime.now();
   }
 
   List<Event> _getEventsForDay(DateTime day) {
-    return events.get(dayFormatter.format(day)) ?? <Event>[];
+    return eventList.where((Event event) => event.startTime.day == day.day && event.startTime.month == day.month && event.startTime.year == day.year).toList();
+  }
+
+  _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    setState(() {
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
+      _selectedEvents = _getEventsForDay(selectedDay);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    eventList = box.values.toList();
+    _onDaySelected(_selectedDay ?? DateTime.now(), _focusedDay);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
@@ -43,12 +58,7 @@ class _CalendarPageState extends State<CalendarPage> {
             selectedDayPredicate: (DateTime day) {
               return isSameDay(_selectedDay, day);
             },
-            onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay; // update `_focusedDay` here as well
-              });
-            },
+            onDaySelected: _onDaySelected,
             onPageChanged: (DateTime focusedDay) {
               _focusedDay = focusedDay;
             },
@@ -57,20 +67,42 @@ class _CalendarPageState extends State<CalendarPage> {
             eventLoader: (DateTime day) {
               return _getEventsForDay(day);
             },
+            calendarStyle: const CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
+              ),
+              markerDecoration: BoxDecoration(color: Colors.deepOrangeAccent),
+            ),
+          ),
+          Container(
+            height: 300,
+            child: ListView.separated(
+              itemCount: _selectedEvents?.length ?? 0,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: Text(_selectedEvents![index].name),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider();
+              },
+            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add Event',
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => EventPage(
-                selectedDay: _selectedDay,
-              ),
-            ),
-          );
+          Navigator.of(context)
+              .push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) => EventPage(
+                    selectedDay: _selectedDay,
+                  ),
+                ),
+              )
+              .then((value) => setState(() {}));
         },
         child: const Icon(Icons.add),
       ),

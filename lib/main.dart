@@ -12,7 +12,7 @@ void main() async {
   final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(applicationDocumentDir.path);
   Hive.registerAdapter(EventAdapter());
-  await Hive.openBox<List<Event>?>('Events'); // open/create events box
+  await Hive.openBox<Event>('Events'); // open/create events box
   runApp(const MyApp());
 }
 

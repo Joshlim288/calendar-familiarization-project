@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
@@ -21,10 +23,10 @@ class _EventPageState extends State<EventPage> {
   bool fullDay = false;
   DateTime? startDateTime;
   DateTime? endDateTime;
-  String title = 'New Event';
-  String comment = '-';
   final DateFormat dayFormatter = DateFormat('E, dd MMM');
   final DateFormat timeFormatter = DateFormat('HH:mm');
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController commentController = TextEditingController();
 
   @override
   void initState() {
@@ -85,10 +87,12 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _submitEvent() {
-    final Box<List<Event>?> eventBox = Hive.box('Events');
-    final List<Event> eventList = eventBox.get(dayFormatter.format(startDateTime!)) ?? <Event>[];
-    eventList.add(Event(name: title, endTime: endDateTime!, startTime: startDateTime!, fullDay: fullDay, comment: comment));
-    eventBox.put(dayFormatter.format(startDateTime!), eventList);
+    final Box<Event> eventBox = Hive.box('Events');
+    final rng = Random();
+    final String name = nameController.text.isNotEmpty ? commentController.text : 'New Event${rng.nextInt(100)}'; // TODO: replace with actual duplicate prevention
+    final String comment = commentController.text.isNotEmpty ? commentController.text : '-';
+    final Event newEvent = Event(fullDay: fullDay, startTime: startDateTime!, comment: comment, name: name, endTime: endDateTime!);
+    eventBox.put(dayFormatter.format(startDateTime!) + name, newEvent);
     Navigator.pop(context);
   }
 
@@ -110,10 +114,11 @@ class _EventPageState extends State<EventPage> {
                   'Name:',
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 10),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
                 child: TextField(
-                  decoration: InputDecoration(
+                  controller: nameController,
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Enter event name',
                   ),
@@ -199,13 +204,14 @@ class _EventPageState extends State<EventPage> {
                 padding: EdgeInsets.only(top: 40),
                 child: Text('Comment:'),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 10),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
                 child: TextField(
                   keyboardType: TextInputType.multiline,
                   minLines: 5,
                   maxLines: 10,
-                  decoration: InputDecoration(
+                  controller: commentController,
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Enter a comment',
                   ),
@@ -232,5 +238,12 @@ class _EventPageState extends State<EventPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    commentController.dispose();
+    super.dispose();
   }
 }
