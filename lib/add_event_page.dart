@@ -86,12 +86,24 @@ class _EventPageState extends State<EventPage> {
     }
   }
 
+  String generateRandomString(int length) {
+    final _random = Random();
+    const _availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    final randomString = List.generate(length, (index) => _availableChars[_random.nextInt(_availableChars.length)]).join();
+
+    return randomString;
+  }
+
   void _submitEvent() {
     final Box<Event> eventBox = Hive.box('Events');
-    final rng = Random();
-    final String name = nameController.text.isNotEmpty ? commentController.text : 'New Event${rng.nextInt(100)}'; // TODO: replace with actual duplicate prevention
+    // initial implementation of unique key generation, may want to improve
+    String key;
+    do {
+      key = generateRandomString(16);
+    } while (eventBox.keys.contains(key));
+    final String name = nameController.text.isNotEmpty ? commentController.text : 'New Event';
     final String comment = commentController.text.isNotEmpty ? commentController.text : '-';
-    final Event newEvent = Event(fullDay: fullDay, startTime: startDateTime!, comment: comment, name: name, endTime: endDateTime!);
+    final Event newEvent = Event(fullDay: fullDay, startTime: startDateTime!, comment: comment, name: name, endTime: endDateTime!, eventKey: key);
     eventBox.put(dayFormatter.format(startDateTime!) + name, newEvent);
     Navigator.pop(context);
   }
