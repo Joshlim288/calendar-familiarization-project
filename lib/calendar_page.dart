@@ -91,6 +91,8 @@ class _CalendarPageState extends State<CalendarPage> {
               itemBuilder: (BuildContext context, int index) {
                 return Card(
                   child: ExpansionTile(
+                    key: Key(_selectedEvents![index].eventKey), //attention
+                    initiallyExpanded: expandedEventIds.contains(_selectedEvents![index].eventKey), //attention
                     leading: SizedBox(
                         width: 50,
                         child: (_selectedEvents![index].startTime.day != _selectedEvents![index].endTime.day)
