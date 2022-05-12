@@ -56,6 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.calendar_month),
               title: const Text('Calendar'),
               onTap: () {
                 Navigator.push(
