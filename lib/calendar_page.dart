@@ -50,6 +50,35 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  _confirmDelete(String name, String eventKey) {
+    showDialog(
+      context: context, barrierDismissible: false, // user must tap button!
+
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Event'),
+          content: Text('Delete event $name?'),
+          actions: [
+            TextButton(
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                box.delete(eventKey);
+                Navigator.of(context).pop();
+                setState(() {});
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     eventList = box.values.toList();
@@ -127,7 +156,35 @@ class _CalendarPageState extends State<CalendarPage> {
                           ),
                     trailing: (expandedEventIds.contains(_selectedEvents![index].eventKey)) ? const Icon(Icons.arrow_drop_up_outlined) : const Icon(Icons.arrow_drop_down_outlined),
                     children: <Widget>[
-                      ListTile(title: Text(_selectedEvents![index].comment)),
+                      ListTile(
+                        title: Text(_selectedEvents![index].comment),
+                        subtitle: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit_calendar_outlined),
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .push(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) => EventPage(
+                                          selectedDay: _selectedDay,
+                                          editEventKey: _selectedEvents![index].eventKey,
+                                        ),
+                                      ),
+                                    )
+                                    .then((value) => setState(() {})); // so that page is reloaded on return
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                _confirmDelete(_selectedEvents![index].name, _selectedEvents![index].eventKey);
+                              },
+                            )
+                          ],
+                        ),
+                      ),
                     ],
                     onExpansionChanged: (bool expanded) {
                       setState(() {
@@ -157,7 +214,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   ),
                 ),
               )
-              .then((value) => setState(() {}));
+              .then((value) => setState(() {})); // so that page is reloaded on return
         },
         child: const Icon(Icons.add),
       ),

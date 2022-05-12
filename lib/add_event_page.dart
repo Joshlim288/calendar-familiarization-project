@@ -8,21 +8,25 @@ import 'package:intl/intl.dart';
 import 'event_model.dart';
 
 class EventPage extends StatefulWidget {
-  EventPage({
+  const EventPage({
     Key? key,
     required this.selectedDay,
+    this.editEventKey,
   }) : super(key: key);
 
   final DateTime? selectedDay;
+  final String? editEventKey;
 
   @override
   State<StatefulWidget> createState() => _EventPageState();
 }
 
 class _EventPageState extends State<EventPage> {
-  bool fullDay = false;
+  late bool fullDay;
   DateTime? startDateTime;
   DateTime? endDateTime;
+  late String bottomButtonString;
+  final Box<Event> eventBox = Hive.box('Events');
   final DateFormat dayFormatter = DateFormat('E, dd MMM');
   final DateFormat timeFormatter = DateFormat('HH:mm');
   final TextEditingController nameController = TextEditingController();
@@ -30,8 +34,23 @@ class _EventPageState extends State<EventPage> {
 
   @override
   void initState() {
-    startDateTime = widget.selectedDay;
-    endDateTime = widget.selectedDay?.add(const Duration(hours: 1));
+    super.initState();
+    if (widget.editEventKey == null) {
+      // creating new event
+      fullDay = false;
+      startDateTime = widget.selectedDay;
+      endDateTime = widget.selectedDay?.add(const Duration(hours: 1));
+      bottomButtonString = 'SUBMIT';
+    } else {
+      // editing existing event
+      final Event eventToEdit = eventBox.get(widget.editEventKey)!;
+      fullDay = eventToEdit.fullDay;
+      startDateTime = eventToEdit.startTime;
+      endDateTime = eventToEdit.endTime;
+      nameController.text = eventToEdit.name;
+      commentController.text = eventToEdit.comment;
+      bottomButtonString = 'SAVE';
+    }
   }
 
   void _selectDate(BuildContext context, bool isStart) async {
@@ -112,13 +131,17 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _submitEvent() {
-    final Box<Event> eventBox = Hive.box('Events');
     // initial implementation of unique key generation, may want to improve
     String key;
-    do {
-      key = generateRandomString(16);
-    } while (eventBox.keys.contains(key));
-    final String name = nameController.text.isNotEmpty ? commentController.text : 'New Event';
+    if (widget.editEventKey != null) {
+      key = widget.editEventKey!;
+    } else {
+      // not editing, generate new key
+      do {
+        key = generateRandomString(16);
+      } while (eventBox.keys.contains(key));
+    }
+    final String name = nameController.text.isNotEmpty ? nameController.text : 'New Event';
     final String comment = commentController.text.isNotEmpty ? commentController.text : '-';
     final Event newEvent = Event(fullDay: fullDay, startTime: startDateTime!, comment: comment, name: name, endTime: endDateTime!, eventKey: key);
     eventBox.put(key, newEvent);
@@ -261,7 +284,7 @@ class _EventPageState extends State<EventPage> {
                 textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               onPressed: _submitEvent,
-              child: const Text('SUBMIT'),
+              child: Text(bottomButtonString),
             ),
           ),
         ),
