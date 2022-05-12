@@ -34,18 +34,35 @@ class _EventPageState extends State<EventPage> {
     endDateTime = widget.selectedDay?.add(const Duration(hours: 1));
   }
 
-  void _selectDate(BuildContext context) async {
+  void _selectDate(BuildContext context, bool isStart) async {
+    DateTime initialDate = isStart ? startDateTime! : endDateTime!;
     final DateTime? selected = await showDatePicker(
       context: context,
-      initialDate: startDateTime!,
+      initialDate: initialDate,
       firstDate: DateTime(2010),
       lastDate: DateTime(2025),
     );
-    if (selected != null && selected != startDateTime!) {
+    if (selected != null && selected != initialDate) {
+      // date has been changed
       setState(() {
-        // multi-day events not yet implemented
-        startDateTime = DateTime(selected.year, selected.month, selected.day, startDateTime!.hour, startDateTime!.minute);
-        endDateTime = DateTime(selected.year, selected.month, selected.day, endDateTime!.hour, endDateTime!.minute);
+        // carry over only year, month and day for new date
+        if (isStart) {
+          if (selected.isBefore(endDateTime!)) {
+            // Check startDate before endDate
+            startDateTime = DateTime(selected.year, selected.month, selected.day, startDateTime!.hour, startDateTime!.minute);
+            return;
+          }
+        } else {
+          if (selected.isAfter(startDateTime!)) {
+            endDateTime = DateTime(selected.year, selected.month, selected.day, endDateTime!.hour, endDateTime!.minute);
+            return;
+          }
+        }
+        Fluttertoast.showToast(
+          msg: 'End Date must be after Start Date', // message
+          toastLength: Toast.LENGTH_SHORT, // length
+          gravity: ToastGravity.BOTTOM, // location
+        );
       });
     }
   }
@@ -87,9 +104,9 @@ class _EventPageState extends State<EventPage> {
   }
 
   String generateRandomString(int length) {
-    final _random = Random();
-    const _availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-    final randomString = List.generate(length, (index) => _availableChars[_random.nextInt(_availableChars.length)]).join();
+    final Random _random = Random();
+    const String _availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    final String randomString = List<String>.generate(length, (int index) => _availableChars[_random.nextInt(_availableChars.length)]).join();
 
     return randomString;
   }
@@ -178,7 +195,7 @@ class _EventPageState extends State<EventPage> {
                           TextButton(
                             child: Text(dayFormatter.format(startDateTime!)),
                             onPressed: () {
-                              _selectDate(context);
+                              _selectDate(context, true);
                             },
                           ),
                           if (!fullDay)
@@ -196,7 +213,7 @@ class _EventPageState extends State<EventPage> {
                           TextButton(
                             child: Text(dayFormatter.format(endDateTime!)),
                             onPressed: () {
-                              _selectDate(context);
+                              _selectDate(context, false);
                             },
                           ),
                           if (!fullDay)

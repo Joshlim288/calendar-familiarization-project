@@ -30,7 +30,11 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   List<Event> _getEventsForDay(DateTime day) {
-    return eventList.where((Event event) => event.startTime.day == day.day && event.startTime.month == day.month && event.startTime.year == day.year).toList();
+    return eventList
+        .where(
+          (Event event) => event.startTime.day <= day.day && day.day <= event.endTime.day && event.startTime.month <= day.month && day.month <= event.endTime.month && event.startTime.year <= day.year && day.year <= event.endTime.year,
+        )
+        .toList();
   }
 
   _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
