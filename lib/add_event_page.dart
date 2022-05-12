@@ -104,7 +104,7 @@ class _EventPageState extends State<EventPage> {
     final String name = nameController.text.isNotEmpty ? commentController.text : 'New Event';
     final String comment = commentController.text.isNotEmpty ? commentController.text : '-';
     final Event newEvent = Event(fullDay: fullDay, startTime: startDateTime!, comment: comment, name: name, endTime: endDateTime!, eventKey: key);
-    eventBox.put(dayFormatter.format(startDateTime!) + name, newEvent);
+    eventBox.put(key, newEvent);
     Navigator.pop(context);
   }
 

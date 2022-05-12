@@ -75,8 +75,7 @@ class _CalendarPageState extends State<CalendarPage> {
               markerDecoration: BoxDecoration(color: Colors.deepOrangeAccent),
             ),
           ),
-          Container(
-            height: 300,
+          Expanded(
             child: ListView.separated(
               itemCount: _selectedEvents?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
