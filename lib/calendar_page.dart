@@ -82,6 +82,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     eventList = box.values.toList();
+    // refresh selection and list of events on every build
     _onDaySelected(_selectedDay ?? DateTime.now(), _focusedDay);
     return Scaffold(
       appBar: AppBar(
@@ -113,6 +114,7 @@ class _CalendarPageState extends State<CalendarPage> {
               markerDecoration: BoxDecoration(color: Colors.deepOrange, shape: BoxShape.circle),
             ),
           ),
+          // List of events
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(8),
