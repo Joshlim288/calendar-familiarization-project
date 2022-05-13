@@ -38,14 +38,22 @@ dependencies:
   hive_flutter: ^1.1.0
   intl: ^0.17.0
   fluttertoast: ^8.0.9
+  http: ^0.13.4
 
 dev_dependencies:
   dependency_validator: ^3.2.0 # `pub run dependency_validator`
   lint: ^1.8.2
   flutter_test:
     sdk: flutter
+  integration_test: # new
+    sdk: flutter              # new
+  test: ^1.14.4               # new
   hive_generator: ^1.1.2
   build_runner: ^2.1.7
+  mockito: ^5.0.0
+
+
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -12,12 +12,14 @@ void main() async {
   final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(applicationDocumentDir.path);
   Hive.registerAdapter(EventAdapter());
-  await Hive.openBox<Event>('Events'); // open/create events box
-  runApp(const MyApp());
+  // Box must be opened and pass along to allow for mocking of the box during integration testing
+  final Box<Event> eventBox = await Hive.openBox<Event>('Events');
+  runApp(MyApp(eventBox: eventBox));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key, required this.eventBox}) : super(key: key);
+  final Box<Event> eventBox;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,14 +27,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Calendar Demo App'),
+      home: MyHomePage(title: 'Calendar Demo App', box: eventBox),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.box}) : super(key: key);
   final String title;
+  final Box<Event> box;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -61,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (BuildContext context) => CalendarPage()),
+                  MaterialPageRoute(builder: (BuildContext context) => CalendarPage(box: widget.box)),
                 );
               },
             ),

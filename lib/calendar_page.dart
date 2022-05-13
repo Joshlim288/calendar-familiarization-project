@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -8,12 +9,13 @@ import 'add_event_page.dart';
 import 'event_model.dart';
 
 class CalendarPage extends StatefulWidget {
+  CalendarPage({required this.box});
+  Box<Event> box;
   @override
   _CalendarPageState createState() => _CalendarPageState();
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  late final Box<Event> box;
   late List<Event> eventList;
   List<String> expandedEventIds = [];
   final DateFormat multiDayFormatter = DateFormat('dd E');
@@ -27,11 +29,23 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    // get the previously opened user box
-    box = Hive.box<Event>('Events');
-    eventList = box.values.toList();
+    // for robustness, if Hive has issue
+    _loadData();
     _focusedDay = DateTime.now();
     _selectedDay = DateTime.now();
+  }
+
+  void _loadData() {
+    try {
+      eventList = widget.box.values.toList();
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Error loading event data', // message
+        toastLength: Toast.LENGTH_SHORT, // length
+        gravity: ToastGravity.BOTTOM, // location
+      );
+      eventList = <Event>[];
+    }
   }
 
   List<Event> _getEventsForDay(DateTime day) {
@@ -62,7 +76,7 @@ class _CalendarPageState extends State<CalendarPage> {
             TextButton(
               child: const Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () {
-                box.delete(eventKey);
+                widget.box.delete(eventKey);
                 Navigator.of(context).pop();
                 setState(() {});
               },
@@ -81,7 +95,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    eventList = box.values.toList();
+    _loadData();
     // refresh selection and list of events on every build
     _onDaySelected(_selectedDay ?? DateTime.now(), _focusedDay);
     return Scaffold(
