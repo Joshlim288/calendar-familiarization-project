@@ -31,13 +31,13 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">3</td>
             <td class="headerCovTableEntry">7</td>
-            <td class="headerCovTableEntryLo">42.9 %</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">Tue May 17 17:58:15 2022</td>
+            <td class="headerValue">Tue May 17 18:11:14 2022</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -66,7 +66,7 @@
 <a name="4"><span class="lineNum">       4 </span>            : </a>
 <a name="5"><span class="lineNum">       5 </span>            : @HiveType(typeId: 0)</a>
 <a name="6"><span class="lineNum">       6 </span>            : class Event extends HiveObject {</a>
-<a name="7"><span class="lineNum">       7 </span><span class="lineCov">          1 :   Event({</span></a>
+<a name="7"><span class="lineNum">       7 </span><span class="lineCov">          2 :   Event({</span></a>
 <a name="8"><span class="lineNum">       8 </span>            :     required this.name,</a>
 <a name="9"><span class="lineNum">       9 </span>            :     required this.fullDay,</a>
 <a name="10"><span class="lineNum">      10 </span>            :     required this.startTime,</a>
@@ -93,18 +93,18 @@
 <a name="31"><span class="lineNum">      31 </span>            :   @HiveField(5)</a>
 <a name="32"><span class="lineNum">      32 </span>            :   String eventKey;</a>
 <a name="33"><span class="lineNum">      33 </span>            : </a>
-<a name="34"><span class="lineNum">      34 </span><span class="lineNoCov">          0 :   @override</span></a>
+<a name="34"><span class="lineNum">      34 </span><span class="lineCov">          1 :   @override</span></a>
 <a name="35"><span class="lineNum">      35 </span>            :   String toString() {</a>
-<a name="36"><span class="lineNum">      36 </span><span class="lineNoCov">          0 :     return eventKey;</span></a>
+<a name="36"><span class="lineNum">      36 </span><span class="lineCov">          1 :     return eventKey;</span></a>
 <a name="37"><span class="lineNum">      37 </span>            :   }</a>
 <a name="38"><span class="lineNum">      38 </span>            : </a>
-<a name="39"><span class="lineNum">      39 </span><span class="lineCov">          1 :   @override</span></a>
+<a name="39"><span class="lineNum">      39 </span><span class="lineCov">          2 :   @override</span></a>
 <a name="40"><span class="lineNum">      40 </span>            :   bool operator ==(Object other) {</a>
-<a name="41"><span class="lineNum">      41 </span><span class="lineCov">          4 :     return (other is Event) &amp;&amp; (eventKey == other.eventKey);</span></a>
+<a name="41"><span class="lineNum">      41 </span><span class="lineCov">          8 :     return (other is Event) &amp;&amp; (eventKey == other.eventKey);</span></a>
 <a name="42"><span class="lineNum">      42 </span>            :   }</a>
 <a name="43"><span class="lineNum">      43 </span>            : </a>
-<a name="44"><span class="lineNum">      44 </span><span class="lineNoCov">          0 :   @override</span></a>
-<a name="45"><span class="lineNum">      45 </span><span class="lineNoCov">          0 :   int get hashCode =&gt; eventKey.hashCode;</span></a>
+<a name="44"><span class="lineNum">      44 </span><span class="lineCov">          1 :   @override</span></a>
+<a name="45"><span class="lineNum">      45 </span><span class="lineCov">          2 :   int get hashCode =&gt; eventKey.hashCode;</span></a>
 <a name="46"><span class="lineNum">      46 </span>            : }</a>
 </pre>
       </td>

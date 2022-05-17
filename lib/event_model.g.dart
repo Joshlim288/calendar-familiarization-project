@@ -1,3 +1,4 @@
+// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'event_model.dart';
@@ -48,9 +49,5 @@ class EventAdapter extends TypeAdapter<Event> {
   int get hashCode => typeId.hashCode;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is EventAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+  bool operator ==(Object other) => identical(this, other) || other is EventAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
