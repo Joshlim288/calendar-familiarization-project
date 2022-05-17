@@ -7,35 +7,28 @@ import 'package:temp/add_event_page.dart';
 import 'package:temp/calendar_page.dart';
 import 'package:temp/event_model.dart';
 
-import 'test_config.dart';
+import 'test_utils.dart';
 
 // Run all tests with `flutter test`, or `flutter run -t .\test\calendar_page_test.dart` to see the tests run on a simulator
 // To see the coverage, run with option --coverage and run `perl %GENHTML% coverage/lcov.info -o coverage/html` in cmd terminal
 void main() {
   Widget? calendarPageMaterialApp;
   Box<Event>? mockHiveBox;
-  // event for testing reads
-  final Event testEvent = Event(
-    comment: 'Test comment',
-    fullDay: false,
-    startTime: DateTime.now(),
-    endTime: DateTime.now().add(const Duration(hours: 1)),
-    name: 'Test Event',
-    eventKey: 'TestKey',
-  );
 
   // Initializing Hive and setting up mock Hive box for testing
   setUp(() async {
-    if (calendarPageMaterialApp == null) {
+    try {
       await Hive.initFlutter();
       final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
       Hive.init(applicationDocumentDir.path);
       Hive.registerAdapter(EventAdapter());
-      mockHiveBox = await Hive.openBox<Event>('MockEvents'); // do not touch real data
-      mockHiveBox!.clear();
-      // creating the CalendarPage widget with 'mock' box
-      calendarPageMaterialApp = MaterialApp(home: CalendarPage(box: mockHiveBox!));
+    } catch (e) {
+      //Hive already initialized
     }
+    // mock box to simulate data
+    mockHiveBox = await Hive.openBox<Event>('MockEventsCalendarPage'); // do not touch real data
+    mockHiveBox!.clear();
+    calendarPageMaterialApp = MaterialApp(home: CalendarPage(box: mockHiveBox!));
   });
 
   group('Testing calendar widget', () {
@@ -60,7 +53,7 @@ void main() {
 
     testWidgets('Test edit event', (WidgetTester tester) async {
       // tests involving updating data must use a new event, to not interfere with other tests, since they are async
-      final Event testEvent = Event(
+      final Event editTestEvent = Event(
         comment: 'Edit Test comment',
         fullDay: false,
         startTime: DateTime.now(),
@@ -69,18 +62,18 @@ void main() {
         eventKey: 'EditTestKey',
       );
       // Check edit page info filled out
-      mockHiveBox!.put('EditTestKey', testEvent);
+      mockHiveBox!.put('EditTestKey', editTestEvent);
       await tester.pumpWidget(calendarPageMaterialApp!);
       final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
       calendarPageState.loadData();
-      await tester.tap(find.text(testEvent.name));
+      await tester.tap(find.text(editTestEvent.name));
       await tester.pumpAndSettle();
       expect(find.text('Edit Test comment'), findsOneWidget);
       await tester.ensureVisible(find.byIcon(Icons.edit_calendar_outlined));
       await tester.tap(find.byIcon(Icons.edit_calendar_outlined));
       await tester.pumpAndSettle();
       expect(find.byType(EventPage), findsOneWidget);
-      expect(find.text(testEvent.name), findsOneWidget);
+      expect(find.text(editTestEvent.name), findsOneWidget);
 
       // Check editing event
       final EventPageState eventPageState = tester.state(find.byType(EventPage));

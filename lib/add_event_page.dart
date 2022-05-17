@@ -54,7 +54,7 @@ class EventPageState extends State<EventPage> {
     }
   }
 
-  void _selectDate(BuildContext context, bool isStart) async {
+  void selectDate(BuildContext context, bool isStart) async {
     DateTime initialDate = isStart ? startDateTime! : endDateTime!;
     final DateTime? selected = await showDatePicker(
       context: context,
@@ -87,7 +87,7 @@ class EventPageState extends State<EventPage> {
     }
   }
 
-  void _selectTime(BuildContext context, bool isStart) async {
+  void selectTime(BuildContext context, bool isStart) async {
     final TimeOfDay selectedTime = isStart ? TimeOfDay.fromDateTime(startDateTime!) : TimeOfDay.fromDateTime(endDateTime!);
     final TimeOfDay? timeOfDay = await showTimePicker(
       context: context,
@@ -131,7 +131,7 @@ class EventPageState extends State<EventPage> {
     return randomString;
   }
 
-  void _submitEvent() {
+  void submitEvent() {
     // initial implementation of unique key generation, may want to improve
     String key;
     if (widget.editEventKey != null) {
@@ -220,14 +220,14 @@ class EventPageState extends State<EventPage> {
                             TextButton(
                               child: Text(dayFormatter.format(startDateTime!)),
                               onPressed: () {
-                                _selectDate(context, true);
+                                selectDate(context, true);
                               },
                             ),
                             if (!fullDay)
                               TextButton(
                                 child: Text(timeFormatter.format(startDateTime!)),
                                 onPressed: () {
-                                  _selectTime(context, true);
+                                  selectTime(context, true);
                                 },
                               ),
                           ],
@@ -239,14 +239,14 @@ class EventPageState extends State<EventPage> {
                           TextButton(
                             child: Text(dayFormatter.format(endDateTime!)),
                             onPressed: () {
-                              _selectDate(context, false);
+                              selectDate(context, false);
                             },
                           ),
                           if (!fullDay)
                             TextButton(
                               child: Text(timeFormatter.format(endDateTime!)),
                               onPressed: () {
-                                _selectTime(context, false);
+                                selectTime(context, false);
                               },
                             ),
                         ],
@@ -286,7 +286,7 @@ class EventPageState extends State<EventPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              onPressed: _submitEvent,
+              onPressed: submitEvent,
               child: Text(bottomButtonString),
             ),
           ),
