@@ -48,7 +48,7 @@ DA:97,2
 DA:100,9
 DA:101,2
 DA:102,1
-DA:104,1
+DA:104,0
 DA:111,9
 DA:112,2
 DA:113,0
@@ -128,7 +128,7 @@ DA:300,4
 DA:301,4
 DA:302,2
 LF:117
-LH:107
+LH:106
 end_of_record
 SF:lib\calendar_page.dart
 DA:12,1

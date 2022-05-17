@@ -1,6 +1,13 @@
 # Calendar Demo App
 Project for familiarization with Flutter and Dart
 
+# Testing
+To run all tests, use the command `flutter test --coverage`
+To see a specific test being run in the UI, start an emulator and use `flutter run -t .\test\<filename>.dart`
+To generate the coverage report, `lcov` is required, and has OS specific installation steps
+Use `genhtml` after installation, running `perl %GENHTML% -o coverage\html coverage\lcov.info` or equivalent in this project directory
+The coverage report is generated in the coverage folder. Open index.html to view.
+
 # Requirements 
 ## Home Page:
 Not much needed on first page

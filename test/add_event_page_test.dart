@@ -38,6 +38,22 @@ void main() {
   });
 
   group('Test selectDate', () {
+    testWidgets('Test end date before start date', (tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(eventPageMaterialApp!);
+      final EventPageState eventPageState = tester.state(find.byType(EventPage));
+      DateTime dayToSet;
+      await tester.tap(find.text(eventPageState.dayFormatter.format(initialDay)).last);
+      dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 1);
+      await tester.pumpAndSettle();
+      expect(find.byType(DatePickerDialog), findsOneWidget);
+      await tester.tap(find.text(dayToSet.day.toString()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.text(eventPageState.dayFormatter.format(dayToSet)), findsNothing);
+    });
+
     testWidgets('Test start date picker', (tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(eventPageMaterialApp!);
@@ -70,25 +86,30 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(eventPageState.dayFormatter.format(dayToSet)), findsOneWidget);
     });
+  });
 
-    testWidgets('Test end date before start date', (tester) async {
+  group('Test selectTime', () {
+    testWidgets('Test end time before start time', (tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(eventPageMaterialApp!);
       final EventPageState eventPageState = tester.state(find.byType(EventPage));
       DateTime dayToSet;
-      await tester.tap(find.text(eventPageState.dayFormatter.format(initialDay)).last);
-      dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 1);
+      // Test start date picker
+      await tester.tap(find.text(eventPageState.timeFormatter.format(initialDay.add(const Duration(hours: 1)))).first);
+      dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 15, 3);
       await tester.pumpAndSettle();
-      expect(find.byType(DatePickerDialog), findsOneWidget);
-      await tester.tap(find.text(dayToSet.day.toString()));
+      expect(find.byType(TimePickerDialog), findsOneWidget);
+
+      // Limitation of timepicker: this is the only way to tap a number (from the docs)
+      var center = tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
+      await tester.tapAt(Offset(center.dx + 10, center.dy)); // +10 picks 3
+
       await tester.pumpAndSettle();
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
-      expect(find.text(eventPageState.dayFormatter.format(dayToSet)), findsNothing);
+      expect(find.text(eventPageState.timeFormatter.format(dayToSet)), findsNothing);
     });
-  });
 
-  group('Test selectTime', () {
     testWidgets('Test start time picker', (tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(eventPageMaterialApp!);
@@ -116,7 +137,7 @@ void main() {
       final EventPageState eventPageState = tester.state(find.byType(EventPage));
       DateTime dayToSet;
       // Test start date picker
-      await tester.tap(find.text(eventPageState.timeFormatter.format(initialDay)).first);
+      await tester.tap(find.text(eventPageState.timeFormatter.format(initialDay.add(const Duration(hours: 1)))).first);
       dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 15, 9);
       await tester.pumpAndSettle();
       expect(find.byType(TimePickerDialog), findsOneWidget);
@@ -129,28 +150,6 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
       expect(find.text(eventPageState.timeFormatter.format(dayToSet)), findsOneWidget);
-    });
-
-    testWidgets('Test end time before start time', (tester) async {
-      setScreenSize(tester);
-      await tester.pumpWidget(eventPageMaterialApp!);
-      final EventPageState eventPageState = tester.state(find.byType(EventPage));
-      DateTime dayToSet;
-      DateTime dayToPick = DateTime(DateTime.now().year, DateTime.now().month, 15, 9); // end time is 9 after last test
-      // Test start date picker
-      await tester.tap(find.text(eventPageState.timeFormatter.format(dayToPick)).last);
-      dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 15, 3);
-      await tester.pumpAndSettle();
-      expect(find.byType(TimePickerDialog), findsOneWidget);
-
-      // Limitation of timepicker: this is the only way to tap a number (from the docs)
-      var center = tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
-      await tester.tapAt(Offset(center.dx + 10, center.dy)); // +10 picks 3
-
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
-      expect(find.text(eventPageState.timeFormatter.format(dayToSet)), findsNothing);
     });
   });
 }
