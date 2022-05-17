@@ -20,6 +20,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key, required this.eventBox}) : super(key: key);
   final Box<Event> eventBox;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

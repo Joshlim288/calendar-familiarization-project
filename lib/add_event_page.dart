@@ -12,21 +12,22 @@ class EventPage extends StatefulWidget {
     Key? key,
     required this.selectedDay,
     this.editEventKey,
+    required this.eventBox,
   }) : super(key: key);
 
   final DateTime? selectedDay;
   final String? editEventKey;
+  final Box<Event> eventBox;
 
   @override
-  State<StatefulWidget> createState() => _EventPageState();
+  State<StatefulWidget> createState() => EventPageState();
 }
 
-class _EventPageState extends State<EventPage> {
+class EventPageState extends State<EventPage> {
   late bool fullDay;
   DateTime? startDateTime;
   DateTime? endDateTime;
   late String bottomButtonString;
-  final Box<Event> eventBox = Hive.box('Events');
   final DateFormat dayFormatter = DateFormat('E, dd MMM');
   final DateFormat timeFormatter = DateFormat('HH:mm');
   final TextEditingController nameController = TextEditingController();
@@ -43,7 +44,7 @@ class _EventPageState extends State<EventPage> {
       bottomButtonString = 'SUBMIT';
     } else {
       // editing existing event
-      final Event eventToEdit = eventBox.get(widget.editEventKey)!;
+      final Event eventToEdit = widget.eventBox.get(widget.editEventKey)!;
       fullDay = eventToEdit.fullDay;
       startDateTime = eventToEdit.startTime;
       endDateTime = eventToEdit.endTime;
@@ -139,12 +140,12 @@ class _EventPageState extends State<EventPage> {
       // not editing, generate new key
       do {
         key = generateRandomString(16);
-      } while (eventBox.keys.contains(key));
+      } while (widget.eventBox.keys.contains(key));
     }
     final String name = nameController.text.isNotEmpty ? nameController.text : 'New Event';
     final String comment = commentController.text.isNotEmpty ? commentController.text : '-';
     final Event newEvent = Event(fullDay: fullDay, startTime: startDateTime!, comment: comment, name: name, endTime: endDateTime!, eventKey: key);
-    eventBox.put(key, newEvent);
+    widget.eventBox.put(key, newEvent);
     Navigator.pop(context);
   }
 
@@ -212,23 +213,25 @@ class _EventPageState extends State<EventPage> {
                   decoration: BoxDecoration(border: Border.all(color: Colors.black38), borderRadius: const BorderRadius.all(Radius.circular(20))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        children: [
-                          TextButton(
-                            child: Text(dayFormatter.format(startDateTime!)),
-                            onPressed: () {
-                              _selectDate(context, true);
-                            },
-                          ),
-                          if (!fullDay)
+                    children: <Widget>[
+                      Flexible(
+                        child: Column(
+                          children: [
                             TextButton(
-                              child: Text(timeFormatter.format(startDateTime!)),
+                              child: Text(dayFormatter.format(startDateTime!)),
                               onPressed: () {
-                                _selectTime(context, true);
+                                _selectDate(context, true);
                               },
                             ),
-                        ],
+                            if (!fullDay)
+                              TextButton(
+                                child: Text(timeFormatter.format(startDateTime!)),
+                                onPressed: () {
+                                  _selectTime(context, true);
+                                },
+                              ),
+                          ],
+                        ),
                       ),
                       const Icon(Icons.arrow_right),
                       Column(

@@ -30,4 +30,17 @@ class Event extends HiveObject {
 
   @HiveField(5)
   String eventKey;
+
+  @override
+  String toString() {
+    return eventKey;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return (other is Event) && (eventKey == other.eventKey);
+  }
+
+  @override
+  int get hashCode => eventKey.hashCode;
 }

@@ -1,101 +1,172 @@
 import 'dart:io';
-import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:temp/add_event_page.dart';
 import 'package:temp/calendar_page.dart';
 import 'package:temp/event_model.dart';
 
-// TODO figure out how to properly mock Hive stuff
-// Run all tests with `flutter test`
+import 'test_config.dart';
+
+// Run all tests with `flutter test`, or `flutter run -t .\test\calendar_page_test.dart` to see the tests run on a simulator
+// To see the coverage, run with option --coverage and run `perl %GENHTML% coverage/lcov.info -o coverage/html` in cmd terminal
 void main() {
-  Widget? calendarPage = null;
-  Box<Event> mockHiveBox;
+  Widget? calendarPageMaterialApp;
+  Box<Event>? mockHiveBox;
+  // event for testing reads
+  final Event testEvent = Event(
+    comment: 'Test comment',
+    fullDay: false,
+    startTime: DateTime.now(),
+    endTime: DateTime.now().add(const Duration(hours: 1)),
+    name: 'Test Event',
+    eventKey: 'TestKey',
+  );
+
+  // Initializing Hive and setting up mock Hive box for testing
   setUp(() async {
-    await Hive.initFlutter();
-    final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
-    Hive.init(applicationDocumentDir.path);
-    Hive.registerAdapter(EventAdapter());
-    mockHiveBox = await Hive.openBox<Event>('MockEvents'); // do not touch real data
-    // creating the CalendarPage widget with 'mock' box
-    calendarPage = MediaQuery(data: MediaQueryData(), child: MaterialApp(home: CalendarPage(box: mockHiveBox)));
+    if (calendarPageMaterialApp == null) {
+      await Hive.initFlutter();
+      final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
+      Hive.init(applicationDocumentDir.path);
+      Hive.registerAdapter(EventAdapter());
+      mockHiveBox = await Hive.openBox<Event>('MockEvents'); // do not touch real data
+      mockHiveBox!.clear();
+      // creating the CalendarPage widget with 'mock' box
+      calendarPageMaterialApp = MaterialApp(home: CalendarPage(box: mockHiveBox!));
+    }
   });
+
   group('Testing calendar widget', () {
-    testWidgets('Check today highlighted', (tester) async {
-      await tester.pumpWidget(calendarPage!);
-      final String day = DateTime.now().day.toString(); // tap next day. If last day, tap first day
-      final Text dayText = tester.widget<Text>(find.text(day));
+    testWidgets('Check today highlighted', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final String day = DateTime.now().day.toString();
+      final Text dayText = tester.widget<Text>(find.text(day).first);
       await tester.pumpAndSettle();
       expect(dayText.style?.color, const Color(0xfffafafa)); // check day is white (selected)
     });
   });
-}
 
-/*
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:testing_app/models/favorites.dart';
-import 'package:testing_app/screens/home.dart';
-
-// follows widget build method in main.dart -> where the page is created
-Widget createHomeScreen() => ChangeNotifierProvider<Favorites>(
-    create: (context) => Favorites(),
-    child: MaterialApp(
-      home: HomePage(),
-    ));
-
-void main() {
-  group('Home Page Widget Tests', () {
-    testWidgets('Testing if ListView shows up', (tester) async {
-      await tester.pumpWidget(createHomeScreen());
-      expect(find.byType(ListView), findsOneWidget);
-    });
-
-    testWidgets('Testing Scrolling', (tester) async {
-      await tester.pumpWidget(createHomeScreen());
-      expect(find.text('Item 0'), findsOneWidget);
-      await tester.fling(find.byType(ListView), Offset(0, -200), 3000);
+  group('Testing add event', () {
+    testWidgets('Check open add event page', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
-      expect(find.text('Item 0'), findsNothing);
+      expect(find.byType(EventPage), findsOneWidget);
     });
 
-    testWidgets('Testing IconButtons', (tester) async {
-      await tester.pumpWidget(createHomeScreen());
-      expect(find.byIcon(Icons.favorite), findsNothing);
-      await tester.tap(find.byIcon(Icons.favorite_border).first);
-      await tester.pumpAndSettle(Duration(seconds: 1));
-      expect(find.text('Added to favorites.'), findsOneWidget);
-      expect(find.byIcon(Icons.favorite), findsWidgets);
-      await tester.tap(find.byIcon(Icons.favorite).first);
-      await tester.pumpAndSettle(Duration(seconds: 1));
-      expect(find.text('Removed from favorites.'), findsOneWidget);
-      expect(find.byIcon(Icons.favorite), findsNothing);
+    testWidgets('Test edit event', (WidgetTester tester) async {
+      // tests involving updating data must use a new event, to not interfere with other tests, since they are async
+      final Event testEvent = Event(
+        comment: 'Edit Test comment',
+        fullDay: false,
+        startTime: DateTime.now(),
+        endTime: DateTime.now().add(const Duration(hours: 1)),
+        name: 'Edit Test Event',
+        eventKey: 'EditTestKey',
+      );
+      // Check edit page info filled out
+      mockHiveBox!.put('EditTestKey', testEvent);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      calendarPageState.loadData();
+      await tester.tap(find.text(testEvent.name));
+      await tester.pumpAndSettle();
+      expect(find.text('Edit Test comment'), findsOneWidget);
+      await tester.ensureVisible(find.byIcon(Icons.edit_calendar_outlined));
+      await tester.tap(find.byIcon(Icons.edit_calendar_outlined));
+      await tester.pumpAndSettle();
+      expect(find.byType(EventPage), findsOneWidget);
+      expect(find.text(testEvent.name), findsOneWidget);
+
+      // Check editing event
+      final EventPageState eventPageState = tester.state(find.byType(EventPage));
+      eventPageState.nameController.text = 'Edited Test Event';
+      await tester.tap(find.text('SAVE'));
+      await tester.pumpAndSettle();
+      expect(find.text('Edited Test Event'), findsOneWidget);
+      expect(find.text('Edit Test Event'), findsNothing);
+    });
+  });
+
+  group('Testing helper functions', () {
+    testWidgets('Test loadData', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      calendarPageState.loadData();
+      // tests involving updating events must use a new event, to not interfere with other tests, since they are async
+      final Event testEventLoadData = Event(
+        comment: 'LoadData Test comment',
+        fullDay: false,
+        startTime: DateTime.now(),
+        endTime: DateTime.now().add(const Duration(hours: 1)),
+        name: 'LoadData Test Event',
+        eventKey: 'LoadData TestKey',
+      );
+      // check list does not contain this event at first
+      expect(calendarPageState.eventList.contains(testEventLoadData), false);
+      // put testEventLoadData, check updated
+      mockHiveBox!.put('LoadData TestKey', testEventLoadData);
+      calendarPageState.loadData();
+      expect(calendarPageState.eventList.contains(testEventLoadData), true);
+      // remove after test done
+      mockHiveBox!.delete('LoadData TestKey');
+    });
+
+    testWidgets('Test getEventsForDay', (WidgetTester tester) async {
+      setScreenSize(tester);
+      mockHiveBox!.put('TestKey', testEvent);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      calendarPageState.loadData();
+      final List<Event> eventList = calendarPageState.getEventsForDay(DateTime.now());
+      expect(eventList.contains(testEvent), true);
+    });
+
+    testWidgets('Test onDaySelected', (WidgetTester tester) async {
+      setScreenSize(tester);
+      mockHiveBox!.put('TestKey', testEvent);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      calendarPageState.loadData();
+      int day = DateTime.now().day != 15 ? 15 : 16;
+      final DateTime newSelectedDay = DateTime(DateTime.now().year, DateTime.now().month, day);
+      expect(calendarPageState.selectedDay?.day == newSelectedDay.day, false);
+      expect(calendarPageState.focusedDay.day == newSelectedDay.day, false);
+      calendarPageState.onDaySelected(newSelectedDay, newSelectedDay);
+      expect(calendarPageState.selectedDay?.day == newSelectedDay.day, true);
+      expect(calendarPageState.focusedDay.day == newSelectedDay.day, true);
+    });
+
+    testWidgets('Test confirmDelete', (WidgetTester tester) async {
+      setScreenSize(tester);
+      // tests involving updating data must use a new event, to not interfere with other tests, since they are async
+      final Event deleteTestKey = Event(
+        comment: 'Delete Test comment',
+        fullDay: false,
+        startTime: DateTime.now(),
+        endTime: DateTime.now().add(const Duration(hours: 1)),
+        name: 'Delete Test Event',
+        eventKey: 'Delete TestKey',
+      );
+      mockHiveBox!.put('Delete TestKey', deleteTestKey);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      calendarPageState.loadData();
+      await tester.tap(find.text(deleteTestKey.name));
+      await tester.pumpAndSettle();
+      expect(find.text('Delete Test comment'), findsOneWidget);
+      await tester.ensureVisible(find.byIcon(Icons.delete));
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+      expect(find.text(deleteTestKey.name), findsNothing);
     });
   });
 }
-import 'package:test/test.dart';
-import 'package:testing_app/models/favorites.dart';
-
-void main() {
-  group('Testing App provider', () {
-    var favorites = Favorites();
-
-    test('A new item should be added', () {
-      var number = 35;
-      favorites.add(number);
-      expect(favorites.items.contains(number), true);
-    });
-
-    test('An item should be removed', () {
-      var number = 45;
-      favorites.add(number);
-      expect(favorites.items.contains(number), true);
-      favorites.remove(number);
-      expect(favorites.items.contains(number), false);
-    });
-  });
-}
-
- */

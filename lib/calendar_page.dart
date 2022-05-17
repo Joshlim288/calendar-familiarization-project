@@ -12,30 +12,30 @@ class CalendarPage extends StatefulWidget {
   CalendarPage({required this.box});
   Box<Event> box;
   @override
-  _CalendarPageState createState() => _CalendarPageState();
+  CalendarPageState createState() => CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class CalendarPageState extends State<CalendarPage> {
   late List<Event> eventList;
   List<String> expandedEventIds = [];
   final DateFormat multiDayFormatter = DateFormat('dd E');
   final DateFormat dayNumFormatter = DateFormat('dd');
   final DateFormat dayTextFormatter = DateFormat('E');
   final DateFormat timeFormatter = DateFormat('hh:mm');
-  late DateTime _focusedDay;
-  DateTime? _selectedDay;
-  List<Event>? _selectedEvents;
+  late DateTime focusedDay;
+  DateTime? selectedDay;
+  List<Event>? selectedEvents;
 
   @override
   void initState() {
     super.initState();
     // for robustness, if Hive has issue
-    _loadData();
-    _focusedDay = DateTime.now();
-    _selectedDay = DateTime.now();
+    loadData();
+    focusedDay = DateTime.now();
+    selectedDay = DateTime.now();
   }
 
-  void _loadData() {
+  void loadData() {
     try {
       eventList = widget.box.values.toList();
     } catch (e) {
@@ -48,7 +48,7 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  List<Event> _getEventsForDay(DateTime day) {
+  List<Event> getEventsForDay(DateTime day) {
     return eventList
         .where(
           (Event event) => event.startTime.day <= day.day && day.day <= event.endTime.day && event.startTime.month <= day.month && day.month <= event.endTime.month && event.startTime.year <= day.year && day.year <= event.endTime.year,
@@ -56,15 +56,15 @@ class _CalendarPageState extends State<CalendarPage> {
         .toList();
   }
 
-  _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  onDaySelected(DateTime newSelectedDay, DateTime newFocusedDay) {
     setState(() {
-      _selectedDay = selectedDay;
-      _focusedDay = focusedDay;
-      _selectedEvents = _getEventsForDay(selectedDay);
+      selectedDay = newSelectedDay;
+      focusedDay = newFocusedDay;
+      selectedEvents = getEventsForDay(newSelectedDay);
     });
   }
 
-  _confirmDelete(String name, String eventKey) {
+  confirmDelete(String name, String eventKey) {
     showDialog(
       context: context, barrierDismissible: false, // user must tap button!
 
@@ -95,9 +95,9 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    _loadData();
+    loadData();
     // refresh selection and list of events on every build
-    _onDaySelected(_selectedDay ?? DateTime.now(), _focusedDay);
+    onDaySelected(selectedDay ?? DateTime.now(), focusedDay);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
@@ -107,18 +107,18 @@ class _CalendarPageState extends State<CalendarPage> {
           TableCalendar(
             firstDay: DateTime(2010),
             lastDay: DateTime(2030),
-            focusedDay: _focusedDay,
+            focusedDay: focusedDay,
             selectedDayPredicate: (DateTime day) {
-              return isSameDay(_selectedDay, day);
+              return isSameDay(selectedDay, day);
             },
-            onDaySelected: _onDaySelected,
-            onPageChanged: (DateTime focusedDay) {
-              _focusedDay = focusedDay;
+            onDaySelected: onDaySelected,
+            onPageChanged: (DateTime newFocusedDay) {
+              focusedDay = newFocusedDay;
             },
             calendarFormat: CalendarFormat.month,
             availableCalendarFormats: const {CalendarFormat.month: 'month'},
             eventLoader: (DateTime day) {
-              return _getEventsForDay(day);
+              return getEventsForDay(day);
             },
             calendarStyle: const CalendarStyle(
               selectedDecoration: BoxDecoration(
@@ -132,48 +132,48 @@ class _CalendarPageState extends State<CalendarPage> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(8),
-              itemCount: _selectedEvents?.length ?? 0,
+              itemCount: selectedEvents?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
                 return Card(
                   child: ExpansionTile(
-                    key: Key(_selectedEvents![index].eventKey), //attention
-                    initiallyExpanded: expandedEventIds.contains(_selectedEvents![index].eventKey), //attention
+                    key: Key(selectedEvents![index].eventKey), //attention
+                    initiallyExpanded: expandedEventIds.contains(selectedEvents![index].eventKey), //attention
                     leading: SizedBox(
                         width: 50,
-                        child: (_selectedEvents![index].startTime.day != _selectedEvents![index].endTime.day)
+                        child: (selectedEvents![index].startTime.day != selectedEvents![index].endTime.day)
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(multiDayFormatter.format(_selectedEvents![index].startTime)),
+                                  Text(multiDayFormatter.format(selectedEvents![index].startTime)),
                                   const Icon(Icons.arrow_downward),
-                                  Text(multiDayFormatter.format(_selectedEvents![index].endTime)),
+                                  Text(multiDayFormatter.format(selectedEvents![index].endTime)),
                                 ],
                               )
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Text(
-                                    dayNumFormatter.format(_selectedEvents![index].startTime),
+                                    dayNumFormatter.format(selectedEvents![index].startTime),
                                     textAlign: TextAlign.center,
                                     textScaleFactor: 1.5,
                                   ),
                                   Text(
-                                    dayTextFormatter.format(_selectedEvents![index].startTime),
+                                    dayTextFormatter.format(selectedEvents![index].startTime),
                                     textAlign: TextAlign.center,
                                     textScaleFactor: 1.15,
                                   ),
                                 ],
                               )),
-                    title: Text(_selectedEvents![index].name),
-                    subtitle: _selectedEvents![index].fullDay
+                    title: Text(selectedEvents![index].name),
+                    subtitle: selectedEvents![index].fullDay
                         ? const Text('Full Day')
                         : Text(
-                            '${timeFormatter.format(_selectedEvents![index].startTime)} to ${timeFormatter.format(_selectedEvents![index].endTime)}',
+                            '${timeFormatter.format(selectedEvents![index].startTime)} to ${timeFormatter.format(selectedEvents![index].endTime)}',
                           ),
-                    trailing: (expandedEventIds.contains(_selectedEvents![index].eventKey)) ? const Icon(Icons.arrow_drop_up_outlined) : const Icon(Icons.arrow_drop_down_outlined),
+                    trailing: (expandedEventIds.contains(selectedEvents![index].eventKey)) ? const Icon(Icons.arrow_drop_up_outlined) : const Icon(Icons.arrow_drop_down_outlined),
                     children: <Widget>[
                       ListTile(
-                        title: Text(_selectedEvents![index].comment),
+                        title: Text(selectedEvents![index].comment),
                         subtitle: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -184,8 +184,9 @@ class _CalendarPageState extends State<CalendarPage> {
                                     .push(
                                       MaterialPageRoute(
                                         builder: (BuildContext context) => EventPage(
-                                          selectedDay: _selectedDay,
-                                          editEventKey: _selectedEvents![index].eventKey,
+                                          selectedDay: selectedDay,
+                                          editEventKey: selectedEvents![index].eventKey,
+                                          eventBox: widget.box,
                                         ),
                                       ),
                                     )
@@ -195,7 +196,7 @@ class _CalendarPageState extends State<CalendarPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                _confirmDelete(_selectedEvents![index].name, _selectedEvents![index].eventKey);
+                                confirmDelete(selectedEvents![index].name, selectedEvents![index].eventKey);
                               },
                             )
                           ],
@@ -204,7 +205,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     ],
                     onExpansionChanged: (bool expanded) {
                       setState(() {
-                        String id = _selectedEvents![index].eventKey;
+                        String id = selectedEvents![index].eventKey;
                         if (expandedEventIds.contains(id)) {
                           expandedEventIds.remove(id);
                         } else {
@@ -226,7 +227,8 @@ class _CalendarPageState extends State<CalendarPage> {
               .push(
                 MaterialPageRoute(
                   builder: (BuildContext context) => EventPage(
-                    selectedDay: _selectedDay,
+                    selectedDay: selectedDay,
+                    eventBox: widget.box,
                   ),
                 ),
               )
