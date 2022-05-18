@@ -15,7 +15,7 @@ class CalendarPage extends StatefulWidget {
 
 class CalendarPageState extends State<CalendarPage> {
   late List<Event> eventList;
-  List<String> expandedEventIds = [];
+  List<String> expandedEventIds = <String>[];
   final DateFormat multiDayFormatter = DateFormat('dd E');
   final DateFormat dayNumFormatter = DateFormat('dd');
   final DateFormat dayTextFormatter = DateFormat('E');
@@ -27,16 +27,17 @@ class CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    // for robustness, if Hive has issue
-    loadData();
+    loadData(); // for robustness, if Hive has issue
     focusedDay = DateTime.now();
     selectedDay = DateTime.now();
   }
 
+  // Refresh data in Hive box
   void loadData() {
     eventList = widget.box.values.toList();
   }
 
+  // Gets list of events for the provided day
   List<Event> getEventsForDay(DateTime day) {
     return eventList
         .where(
@@ -45,7 +46,8 @@ class CalendarPageState extends State<CalendarPage> {
         .toList();
   }
 
-  onDaySelected(DateTime newSelectedDay, DateTime newFocusedDay) {
+  // Updated selected day & event states when day is tapped
+  void onDaySelected(DateTime newSelectedDay, DateTime newFocusedDay) {
     setState(() {
       selectedDay = newSelectedDay;
       focusedDay = newFocusedDay;
@@ -53,7 +55,8 @@ class CalendarPageState extends State<CalendarPage> {
     });
   }
 
-  confirmDelete(String name, String eventKey) {
+  // Display delete confirmation dialog
+  void confirmDelete(String name, String eventKey) {
     showDialog(
       context: context, barrierDismissible: false, // user must tap button!
 
@@ -132,7 +135,7 @@ class CalendarPageState extends State<CalendarPage> {
                         width: 15.0.w,
                         child: (selectedEvents![index].startTime.day != selectedEvents![index].endTime.day)
                             ? Column(
-                                // TODO: find a way to make multi-day text better on small screens
+                                // TODO: find a way to make multi-day text not overflow on small screens
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(

@@ -9,7 +9,8 @@ void main() {
   });
 
   test('Test compareTo', () {
-    Event compareTestEvent = Event(
+    // initialize new testing event for testing event comparison
+    final Event compareTestEvent = Event(
       endTime: DateTime.now(),
       comment: 'Test compareTo comment',
       name: 'Test compareTo event',
@@ -17,6 +18,7 @@ void main() {
       eventKey: 'TestKey',
       startTime: DateTime.now(),
     );
+
     expect(compareTestEvent == testEvent, true);
     compareTestEvent.eventKey = 'TestNotEqualKey';
     expect(compareTestEvent == testEvent, false);

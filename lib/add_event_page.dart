@@ -55,7 +55,7 @@ class EventPageState extends State<EventPage> {
   }
 
   void selectDate(BuildContext context, bool isStart) async {
-    DateTime initialDate = isStart ? startDateTime! : endDateTime!;
+    final DateTime initialDate = isStart ? startDateTime! : endDateTime!;
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -74,6 +74,7 @@ class EventPageState extends State<EventPage> {
           }
         } else {
           if (selected.isAfter(startDateTime!)) {
+            // Check endDate after startDate
             endDateTime = DateTime(selected.year, selected.month, selected.day, endDateTime!.hour, endDateTime!.minute);
             return;
           }

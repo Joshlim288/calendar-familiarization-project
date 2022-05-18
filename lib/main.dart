@@ -9,12 +9,15 @@ import 'package:temp/calendar_page.dart';
 import 'event_model.dart';
 
 void main() async {
+  // Initialize Hive before running application
   await Hive.initFlutter();
   final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
   Hive.init(applicationDocumentDir.path);
   Hive.registerAdapter(EventAdapter());
-  // Box must be opened and pass along to allow for mocking of the box during integration testing
+
+  // Box must be opened and passed along to allow for mocking of the box during integration testing
   final Box<Event> eventBox = await Hive.openBox<Event>('Events');
+
   runApp(MyApp(eventBox: eventBox));
 }
 
@@ -25,13 +28,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Sizer(
-      builder: (context, orientation, deviceType) {
+      // To allow for relative sizes
+      builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
         return MaterialApp(
-          title: 'Flutter Demo',
+          title: 'Calendar Demo App',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: MyHomePage(title: 'Calendar Demo App', box: eventBox),
+          home: MyHomePage(title: 'Calendar Demo HomePage', box: eventBox),
         );
       },
     );
@@ -54,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
-          children: [
+          children: <Widget>[
             const SizedBox(
               height: 100,
               child: DrawerHeader(
