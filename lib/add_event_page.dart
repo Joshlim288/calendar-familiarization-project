@@ -123,14 +123,6 @@ class EventPageState extends State<EventPage> {
     }
   }
 
-  String generateRandomString(int length) {
-    final Random _random = Random();
-    const String _availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-    final String randomString = List<String>.generate(length, (int index) => _availableChars[_random.nextInt(_availableChars.length)]).join();
-
-    return randomString;
-  }
-
   void submitEvent() {
     // initial implementation of unique key generation, may want to improve
     String key;
@@ -301,4 +293,12 @@ class EventPageState extends State<EventPage> {
     commentController.dispose();
     super.dispose();
   }
+}
+
+String generateRandomString(int length) {
+  final Random _random = Random();
+  const String _availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final String randomString = List<String>.generate(length, (int index) => _availableChars[_random.nextInt(_availableChars.length)]).join();
+
+  return randomString;
 }
