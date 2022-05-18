@@ -39,6 +39,7 @@ dependencies:
   intl: ^0.17.0
   fluttertoast: ^8.0.9
   http: ^0.13.4
+  sizer: ^2.0.15
 
 dev_dependencies:
   dependency_validator: ^3.2.0 # `pub run dependency_validator`

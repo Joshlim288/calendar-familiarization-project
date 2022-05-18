@@ -28,7 +28,6 @@ void main() {
     } catch (e) {
       //Hive already initialized
     }
-    mockHiveBox!.clear();
     eventPageMaterialApp = MaterialApp(
       home: EventPage(
         eventBox: mockHiveBox!,

@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:temp/add_event_page.dart';
 import 'package:temp/calendar_page.dart';
 import 'package:temp/event_model.dart';
+import 'package:sizer/sizer.dart';
 
 import 'test_utils.dart';
 
@@ -27,8 +28,17 @@ void main() {
     } catch (e) {
       //Hive already initialized
     }
-    mockHiveBox!.clear(); // clear data before start of each test
-    calendarPageMaterialApp = MaterialApp(home: CalendarPage(box: mockHiveBox!));
+    calendarPageMaterialApp = Sizer(
+      builder: (context, orientation, deviceType) {
+        return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: CalendarPage(box: mockHiveBox!),
+        );
+      },
+    );
   });
 
   group('Testing calendar widget', () {
@@ -40,12 +50,44 @@ void main() {
       await tester.pumpAndSettle();
       expect(dayText.style?.color, const Color(0xfffafafa)); // check day is white (selected)
     });
+
+    testWidgets('Check multi-day event display', (WidgetTester tester) async {
+      setScreenSize(tester);
+      DateTime startTime = DateTime.now();
+      DateTime endTime = DateTime.now().add(const Duration(days: 1));
+      final Event multiDayTestEvent = Event(
+        comment: 'Multi-Day Test comment',
+        fullDay: false,
+        startTime: startTime,
+        endTime: endTime,
+        name: 'Multi-Day Test Event',
+        eventKey: 'Multi-Day TestKey',
+      );
+      mockHiveBox!.put(multiDayTestEvent.eventKey, multiDayTestEvent);
+
+      // Check both dates are visible on current day
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      expect(find.text(calendarPageState.multiDayFormatter.format(startTime)), findsOneWidget);
+      expect(find.text(calendarPageState.multiDayFormatter.format(endTime)), findsOneWidget);
+
+      // Check both dates are visible on next day
+      await tester.tap(find.text(endTime.day.toString()).first);
+      await tester.pumpAndSettle();
+      expect(find.text(calendarPageState.multiDayFormatter.format(startTime)), findsOneWidget);
+      expect(find.text(calendarPageState.multiDayFormatter.format(endTime)), findsOneWidget);
+
+      // Remove event after done
+      mockHiveBox!.delete(multiDayTestEvent.eventKey);
+    });
   });
 
   group('Testing add event', () {
-    testWidgets('Check open add event page', (WidgetTester tester) async {
+    testWidgets('Check add event', (WidgetTester tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(calendarPageMaterialApp!);
+
+      // Check add event page opens
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
       expect(find.byType(EventPage), findsOneWidget);
@@ -82,6 +124,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Edited Test Event'), findsOneWidget);
       expect(find.text('Edit Test Event'), findsNothing);
+
+      // delete edit comment after done
+      mockHiveBox!.delete('EditTestKey');
     });
   });
 
@@ -146,17 +191,31 @@ void main() {
         name: 'Delete Test Event',
         eventKey: 'Delete TestKey',
       );
+
       mockHiveBox!.put('Delete TestKey', deleteTestKey);
       await tester.pumpWidget(calendarPageMaterialApp!);
       final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
       calendarPageState.loadData();
+
+      // Check event successfully added
       await tester.tap(find.text(deleteTestKey.name));
       await tester.pumpAndSettle();
       expect(find.text('Delete Test comment'), findsOneWidget);
+
+      // Tap delete
       await tester.ensureVisible(find.byIcon(Icons.delete));
       await tester.tap(find.byIcon(Icons.delete));
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsOneWidget);
+
+      // Test cancel delete
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text(deleteTestKey.name), findsOneWidget);
+
+      // Test delete event
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
       expect(find.text(deleteTestKey.name), findsNothing);

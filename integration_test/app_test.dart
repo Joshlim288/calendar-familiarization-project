@@ -12,7 +12,8 @@ import 'package:temp/main.dart';
 // run with: `flutter drive --driver integration_test/driver.dart --target integration_test/app_test.dart --profile`
 // requires an emulator/device on API > 31 (android 12)
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized() as IntegrationTestWidgetsFlutterBinding;
+  Box<Event>? mockHiveBox = null;
   // fullyLive: best for heavily-animated situations
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   setUp(() async {
@@ -20,12 +21,12 @@ void main() {
     final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
     Hive.init(applicationDocumentDir.path);
     Hive.registerAdapter(EventAdapter());
+    mockHiveBox = await Hive.openBox<Event>('MockEvents'); // do not touch real data
   });
 
   group('Testing navigation', () {
     testWidgets('Testing for navigating to calendar page', (WidgetTester tester) async {
-      final Box<Event> mockHiveBox = await Hive.openBox<Event>('MockEvents'); // do not touch real data
-      await tester.pumpWidget(MyApp(eventBox: mockHiveBox));
+      await tester.pumpWidget(MyApp(eventBox: mockHiveBox!));
       final Finder locateDrawer = find.byTooltip('Open navigation menu');
       await tester.tap(locateDrawer);
       await tester.pumpAndSettle();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:sizer/sizer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'add_event_page.dart';
 import 'event_model.dart';
@@ -117,24 +118,32 @@ class CalendarPageState extends State<CalendarPage> {
             ),
           ),
           // List of events
-          Expanded(
+          Flexible(
             child: ListView.builder(
               padding: const EdgeInsets.all(8),
               itemCount: selectedEvents?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
                 return Card(
                   child: ExpansionTile(
+                    childrenPadding: EdgeInsets.zero,
                     key: Key(selectedEvents![index].eventKey), //attention
-                    initiallyExpanded: expandedEventIds.contains(selectedEvents![index].eventKey), //attention
+                    initiallyExpanded: expandedEventIds.contains(selectedEvents![index].eventKey),
                     leading: SizedBox(
-                        width: 50,
+                        width: 15.0.w,
                         child: (selectedEvents![index].startTime.day != selectedEvents![index].endTime.day)
                             ? Column(
+                                // TODO: find a way to make multi-day text better on small screens
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(multiDayFormatter.format(selectedEvents![index].startTime)),
-                                  const Icon(Icons.arrow_downward),
-                                  Text(multiDayFormatter.format(selectedEvents![index].endTime)),
+                                  Text(
+                                    multiDayFormatter.format(selectedEvents![index].startTime),
+                                    style: TextStyle(fontSize: 8.0.sp),
+                                  ),
+                                  Icon(Icons.arrow_downward, size: 4.0.w),
+                                  Text(
+                                    multiDayFormatter.format(selectedEvents![index].endTime),
+                                    style: TextStyle(fontSize: 8.0.sp),
+                                  ),
                                 ],
                               )
                             : Column(
@@ -143,12 +152,12 @@ class CalendarPageState extends State<CalendarPage> {
                                   Text(
                                     dayNumFormatter.format(selectedEvents![index].startTime),
                                     textAlign: TextAlign.center,
-                                    textScaleFactor: 1.5,
+                                    style: TextStyle(fontSize: 16.0.sp),
                                   ),
                                   Text(
                                     dayTextFormatter.format(selectedEvents![index].startTime),
                                     textAlign: TextAlign.center,
-                                    textScaleFactor: 1.15,
+                                    style: TextStyle(fontSize: 12.0.sp),
                                   ),
                                 ],
                               )),
