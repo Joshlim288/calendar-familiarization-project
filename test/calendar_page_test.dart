@@ -102,16 +102,6 @@ void main() {
   });
 
   group('Testing event management', () {
-    testWidgets('Check add event', (WidgetTester tester) async {
-      setScreenSize(tester);
-      await tester.pumpWidget(calendarPageMaterialApp!);
-
-      // Check add event page opens
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
-      expect(find.byType(EventPage), findsOneWidget);
-    });
-
     testWidgets('Test edit event', (WidgetTester tester) async {
       // tests involving updating data must use a new event, to not interfere with other tests, since they are async
       final Event editTestEvent = Event(
@@ -187,6 +177,36 @@ void main() {
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
       expect(find.text(deleteTestKey.name), findsNothing);
+    });
+
+    testWidgets('Test add event', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+
+      // Check add event page opens
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(EventPage), findsOneWidget);
+
+      // Add new event
+      final EventPageState eventPageState = tester.state(find.byType(EventPage));
+      eventPageState.fullDay = true;
+      eventPageState.nameController.text = 'Test Add Event';
+      eventPageState.commentController.text = 'Test Add Comment';
+      await tester.tap(find.text('SUBMIT'));
+      await tester.pumpAndSettle();
+
+      // Check calendar has refreshed
+      expect(find.text('Test Add Event'), findsOneWidget);
+
+      // Delete event after done
+      await tester.tap(find.text('Test Add Event'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+      expect(find.text('Test Add Event'), findsNothing);
     });
   });
 

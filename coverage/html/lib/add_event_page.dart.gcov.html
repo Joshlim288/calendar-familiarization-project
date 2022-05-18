@@ -31,13 +31,13 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">114</td>
+            <td class="headerCovTableEntry">116</td>
             <td class="headerCovTableEntry">117</td>
-            <td class="headerCovTableEntryHi">97.4 %</td>
+            <td class="headerCovTableEntryHi">99.1 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">Wed May 18 14:38:23 2022</td>
+            <td class="headerValue">Wed May 18 14:50:56 2022</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -193,8 +193,8 @@
 <a name="131"><span class="lineNum">     131 </span>            :     } else {</a>
 <a name="132"><span class="lineNum">     132 </span>            :       // not editing, generate new key</a>
 <a name="133"><span class="lineNum">     133 </span>            :       do {</a>
-<a name="134"><span class="lineNum">     134 </span><span class="lineNoCov">          0 :         key = generateRandomString(16);</span></a>
-<a name="135"><span class="lineNum">     135 </span><span class="lineNoCov">          0 :       } while (widget.eventBox.keys.contains(key));</span></a>
+<a name="134"><span class="lineNum">     134 </span><span class="lineCov">          1 :         key = generateRandomString(16);</span></a>
+<a name="135"><span class="lineNum">     135 </span><span class="lineCov">          4 :       } while (widget.eventBox.keys.contains(key));</span></a>
 <a name="136"><span class="lineNum">     136 </span>            :     }</a>
 <a name="137"><span class="lineNum">     137 </span><span class="lineCov">          5 :     final String name = nameController.text.isNotEmpty ? nameController.text : 'New Event';</span></a>
 <a name="138"><span class="lineNum">     138 </span><span class="lineCov">          5 :     final String comment = commentController.text.isNotEmpty ? commentController.text : '-';</span></a>
@@ -357,10 +357,10 @@
 <a name="295"><span class="lineNum">     295 </span>            :   }</a>
 <a name="296"><span class="lineNum">     296 </span>            : }</a>
 <a name="297"><span class="lineNum">     297 </span>            : </a>
-<a name="298"><span class="lineNum">     298 </span><span class="lineCov">          1 : String generateRandomString(int length) {</span></a>
-<a name="299"><span class="lineNum">     299 </span><span class="lineCov">          1 :   final Random _random = Random();</span></a>
+<a name="298"><span class="lineNum">     298 </span><span class="lineCov">          2 : String generateRandomString(int length) {</span></a>
+<a name="299"><span class="lineNum">     299 </span><span class="lineCov">          2 :   final Random _random = Random();</span></a>
 <a name="300"><span class="lineNum">     300 </span>            :   const String _availableChars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';</a>
-<a name="301"><span class="lineNum">     301 </span><span class="lineCov">          6 :   final String randomString = List&lt;String&gt;.generate(length, (int index) =&gt; _availableChars[_random.nextInt(_availableChars.length)]).join();</span></a>
+<a name="301"><span class="lineNum">     301 </span><span class="lineCov">         12 :   final String randomString = List&lt;String&gt;.generate(length, (int index) =&gt; _availableChars[_random.nextInt(_availableChars.length)]).join();</span></a>
 <a name="302"><span class="lineNum">     302 </span>            : </a>
 <a name="303"><span class="lineNum">     303 </span>            :   return randomString;</a>
 <a name="304"><span class="lineNum">     304 </span>            : }</a>

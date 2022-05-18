@@ -36,6 +36,7 @@ void main() {
     );
   });
 
+  // while logic can be extracted, repetition is left in for clarity -> to more easily see the flow for each test case
   group('Test selectDate', () {
     testWidgets('Test start date after end date', (WidgetTester tester) async {
       setScreenSize(tester);
@@ -100,6 +101,7 @@ void main() {
   });
 
   group('Test selectTime', () {
+    // while logic can be extracted, repetition is left in for clarity -> to more easily see the flow for each test case
     testWidgets('Test start time after end time', (WidgetTester tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(eventPageMaterialApp!);
