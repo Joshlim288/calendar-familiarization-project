@@ -1,6 +1,8 @@
 # Calendar Demo App
 Project for familiarization with Flutter and Dart
 
+<img src="https://github.com/Joshlim288/calendar_familiarization_project/blob/main/images/Screenshot_20220518_173757.png" width="300">    <img src="https://github.com/Joshlim288/calendar_familiarization_project/blob/main/images/Screenshot_20220518_173840.png" width="300">
+
 # Testing
 To run all tests, use the command `flutter test --coverage`
 
