@@ -22,12 +22,12 @@ void main() {
       final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
       Hive.init(applicationDocumentDir.path);
       Hive.registerAdapter(EventAdapter());
+      // mock box to simulate data
+      mockHiveBox = await Hive.openBox<Event>('MockEventsCalendarPage'); // do not touch real data
     } catch (e) {
       //Hive already initialized
     }
-    // mock box to simulate data
-    mockHiveBox = await Hive.openBox<Event>('MockEventsCalendarPage'); // do not touch real data
-    mockHiveBox!.clear();
+    mockHiveBox!.clear(); // clear data before start of each test
     calendarPageMaterialApp = MaterialApp(home: CalendarPage(box: mockHiveBox!));
   });
 

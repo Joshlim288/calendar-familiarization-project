@@ -1,16 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import 'add_event_page.dart';
 import 'event_model.dart';
 
 class CalendarPage extends StatefulWidget {
-  CalendarPage({required this.box});
-  Box<Event> box;
+  const CalendarPage({required this.box});
+  final Box<Event> box;
   @override
   CalendarPageState createState() => CalendarPageState();
 }
@@ -36,16 +33,7 @@ class CalendarPageState extends State<CalendarPage> {
   }
 
   void loadData() {
-    try {
-      eventList = widget.box.values.toList();
-    } catch (e) {
-      Fluttertoast.showToast(
-        msg: 'Error loading event data', // message
-        toastLength: Toast.LENGTH_SHORT, // length
-        gravity: ToastGravity.BOTTOM, // location
-      );
-      eventList = <Event>[];
-    }
+    eventList = widget.box.values.toList();
   }
 
   List<Event> getEventsForDay(DateTime day) {
@@ -103,7 +91,7 @@ class CalendarPageState extends State<CalendarPage> {
         title: const Text('Calendar'),
       ),
       body: Column(
-        children: [
+        children: <Widget>[
           TableCalendar(
             firstDay: DateTime(2010),
             lastDay: DateTime(2030),

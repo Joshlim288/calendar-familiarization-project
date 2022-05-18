@@ -23,11 +23,11 @@ void main() {
       final Directory applicationDocumentDir = await path_provider.getApplicationDocumentsDirectory();
       Hive.init(applicationDocumentDir.path);
       Hive.registerAdapter(EventAdapter());
+      // mock box to simulate data
+      mockHiveBox = await Hive.openBox<Event>('MockEventsEventsPage'); // do not touch real data
     } catch (e) {
       //Hive already initialized
     }
-    // mock box to simulate data
-    mockHiveBox = await Hive.openBox<Event>('MockEventsEventsPage'); // do not touch real data
     mockHiveBox!.clear();
     eventPageMaterialApp = MaterialApp(
       home: EventPage(
