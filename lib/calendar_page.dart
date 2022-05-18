@@ -152,12 +152,12 @@ class CalendarPageState extends State<CalendarPage> {
                                   Text(
                                     dayNumFormatter.format(selectedEvents![index].startTime),
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 16.0.sp),
+                                    style: TextStyle(fontSize: 13.0.sp),
                                   ),
                                   Text(
                                     dayTextFormatter.format(selectedEvents![index].startTime),
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 12.0.sp),
+                                    style: TextStyle(fontSize: 11.0.sp),
                                   ),
                                 ],
                               )),

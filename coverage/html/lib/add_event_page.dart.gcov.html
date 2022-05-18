@@ -31,13 +31,13 @@
             <td class="headerValue">lcov.info</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">106</td>
+            <td class="headerCovTableEntry">108</td>
             <td class="headerCovTableEntry">117</td>
-            <td class="headerCovTableEntryHi">90.6 %</td>
+            <td class="headerCovTableEntryHi">92.3 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">Wed May 18 12:56:26 2022</td>
+            <td class="headerValue">Wed May 18 14:02:15 2022</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">0</td>
@@ -163,7 +163,7 @@
 <a name="101"><span class="lineNum">     101 </span><span class="lineCov">          2 :           if (selectedDateTime.isBefore(endDateTime!)) {</span></a>
 <a name="102"><span class="lineNum">     102 </span><span class="lineCov">          1 :             startDateTime = selectedDateTime;</span></a>
 <a name="103"><span class="lineNum">     103 </span>            :           } else {</a>
-<a name="104"><span class="lineNum">     104 </span><span class="lineNoCov">          0 :             Fluttertoast.showToast(</span></a>
+<a name="104"><span class="lineNum">     104 </span><span class="lineCov">          1 :             Fluttertoast.showToast(</span></a>
 <a name="105"><span class="lineNum">     105 </span>            :               msg: 'Start Time must be before End Time', // message</a>
 <a name="106"><span class="lineNum">     106 </span>            :               toastLength: Toast.LENGTH_SHORT, // length</a>
 <a name="107"><span class="lineNum">     107 </span>            :               gravity: ToastGravity.BOTTOM, // location</a>
@@ -172,7 +172,7 @@
 <a name="110"><span class="lineNum">     110 </span>            :         } else {</a>
 <a name="111"><span class="lineNum">     111 </span><span class="lineCov">          9 :           selectedDateTime = DateTime(endDateTime!.year, endDateTime!.month, endDateTime!.day, timeOfDay.hour, timeOfDay.minute);</span></a>
 <a name="112"><span class="lineNum">     112 </span><span class="lineCov">          2 :           if (selectedDateTime.isAfter(startDateTime!)) {</span></a>
-<a name="113"><span class="lineNum">     113 </span><span class="lineNoCov">          0 :             endDateTime = selectedDateTime;</span></a>
+<a name="113"><span class="lineNum">     113 </span><span class="lineCov">          1 :             endDateTime = selectedDateTime;</span></a>
 <a name="114"><span class="lineNum">     114 </span>            :           } else {</a>
 <a name="115"><span class="lineNum">     115 </span><span class="lineCov">          1 :             Fluttertoast.showToast(</span></a>
 <a name="116"><span class="lineNum">     116 </span>            :               msg: 'End Time must be after Start Time', // message</a>

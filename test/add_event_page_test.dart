@@ -15,7 +15,7 @@ import 'test_utils.dart';
 void main() {
   Widget? eventPageMaterialApp;
   Box<Event>? mockHiveBox;
-  DateTime initialDay = DateTime(DateTime.now().year, DateTime.now().month, 15, 8);
+  DateTime initialDay = DateTime(DateTime.now().year, DateTime.now().month, 15, 7);
 
   setUp(() async {
     try {
@@ -37,6 +37,22 @@ void main() {
   });
 
   group('Test selectDate', () {
+    testWidgets('Test start date after end date', (tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(eventPageMaterialApp!);
+      final EventPageState eventPageState = tester.state(find.byType(EventPage));
+      DateTime dayToSet;
+      await tester.tap(find.text(eventPageState.dayFormatter.format(initialDay)).first);
+      dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 31);
+      await tester.pumpAndSettle();
+      expect(find.byType(DatePickerDialog), findsOneWidget);
+      await tester.tap(find.text(dayToSet.day.toString()));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.text(eventPageState.dayFormatter.format(dayToSet)), findsNothing);
+    });
+
     testWidgets('Test end date before start date', (tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(eventPageMaterialApp!);
@@ -88,6 +104,27 @@ void main() {
   });
 
   group('Test selectTime', () {
+    testWidgets('Test start time after end time', (tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(eventPageMaterialApp!);
+      final EventPageState eventPageState = tester.state(find.byType(EventPage));
+      DateTime dayToSet;
+      // Test start date picker
+      await tester.tap(find.text(eventPageState.timeFormatter.format(initialDay)).first);
+      dayToSet = DateTime(DateTime.now().year, DateTime.now().month, 15, 9);
+      await tester.pumpAndSettle();
+      expect(find.byType(TimePickerDialog), findsOneWidget);
+
+      // Limitation of timepicker: this is the only way to tap a number (from the docs)
+      var center = tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
+      await tester.tapAt(Offset(center.dx - 10, center.dy)); // -10 picks 9
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.text(eventPageState.timeFormatter.format(dayToSet)), findsNothing);
+    });
+
     testWidgets('Test end time before start time', (tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(eventPageMaterialApp!);

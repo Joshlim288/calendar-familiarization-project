@@ -25,6 +25,7 @@ void main() {
       Hive.registerAdapter(EventAdapter());
       // mock box to simulate data
       mockHiveBox = await Hive.openBox<Event>('MockEventsCalendarPage'); // do not touch real data
+      mockHiveBox!.put('TestKey', testEvent);
     } catch (e) {
       //Hive already initialized
     }
@@ -41,7 +42,7 @@ void main() {
     );
   });
 
-  group('Testing calendar widget', () {
+  group('Testing calendar and event list widgets', () {
     testWidgets('Check today highlighted', (WidgetTester tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(calendarPageMaterialApp!);
@@ -80,9 +81,27 @@ void main() {
       // Remove event after done
       mockHiveBox!.delete(multiDayTestEvent.eventKey);
     });
+
+    testWidgets('Test expanding event', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+
+      // check comment not visible
+      expect(find.text(testEvent.comment), findsNothing);
+
+      // expand and check comment visible
+      await tester.tap(find.text(testEvent.name));
+      await tester.pumpAndSettle();
+      expect(find.text(testEvent.comment), findsOneWidget);
+
+      // collapse and check comment not visible again
+      await tester.tap(find.text(testEvent.name));
+      await tester.pumpAndSettle();
+      expect(find.text(testEvent.comment), findsNothing);
+    });
   });
 
-  group('Testing add event', () {
+  group('Testing event management', () {
     testWidgets('Check add event', (WidgetTester tester) async {
       setScreenSize(tester);
       await tester.pumpWidget(calendarPageMaterialApp!);
@@ -128,59 +147,8 @@ void main() {
       // delete edit comment after done
       mockHiveBox!.delete('EditTestKey');
     });
-  });
 
-  group('Testing helper functions', () {
-    testWidgets('Test loadData', (WidgetTester tester) async {
-      setScreenSize(tester);
-      await tester.pumpWidget(calendarPageMaterialApp!);
-      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
-      calendarPageState.loadData();
-      // tests involving updating events must use a new event, to not interfere with other tests, since they are async
-      final Event testEventLoadData = Event(
-        comment: 'LoadData Test comment',
-        fullDay: false,
-        startTime: DateTime.now(),
-        endTime: DateTime.now().add(const Duration(hours: 1)),
-        name: 'LoadData Test Event',
-        eventKey: 'LoadData TestKey',
-      );
-      // check list does not contain this event at first
-      expect(calendarPageState.eventList.contains(testEventLoadData), false);
-      // put testEventLoadData, check updated
-      mockHiveBox!.put('LoadData TestKey', testEventLoadData);
-      calendarPageState.loadData();
-      expect(calendarPageState.eventList.contains(testEventLoadData), true);
-      // remove after test done
-      mockHiveBox!.delete('LoadData TestKey');
-    });
-
-    testWidgets('Test getEventsForDay', (WidgetTester tester) async {
-      setScreenSize(tester);
-      mockHiveBox!.put('TestKey', testEvent);
-      await tester.pumpWidget(calendarPageMaterialApp!);
-      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
-      calendarPageState.loadData();
-      final List<Event> eventList = calendarPageState.getEventsForDay(DateTime.now());
-      expect(eventList.contains(testEvent), true);
-    });
-
-    testWidgets('Test onDaySelected', (WidgetTester tester) async {
-      setScreenSize(tester);
-      mockHiveBox!.put('TestKey', testEvent);
-      await tester.pumpWidget(calendarPageMaterialApp!);
-      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
-      calendarPageState.loadData();
-      int day = DateTime.now().day != 15 ? 15 : 16;
-      final DateTime newSelectedDay = DateTime(DateTime.now().year, DateTime.now().month, day);
-      expect(calendarPageState.selectedDay?.day == newSelectedDay.day, false);
-      expect(calendarPageState.focusedDay.day == newSelectedDay.day, false);
-      calendarPageState.onDaySelected(newSelectedDay, newSelectedDay);
-      expect(calendarPageState.selectedDay?.day == newSelectedDay.day, true);
-      expect(calendarPageState.focusedDay.day == newSelectedDay.day, true);
-    });
-
-    testWidgets('Test confirmDelete', (WidgetTester tester) async {
+    testWidgets('Test delete event', (WidgetTester tester) async {
       setScreenSize(tester);
       // tests involving updating data must use a new event, to not interfere with other tests, since they are async
       final Event deleteTestKey = Event(
@@ -219,6 +187,53 @@ void main() {
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
       expect(find.text(deleteTestKey.name), findsNothing);
+    });
+  });
+
+  group('Testing helper functions', () {
+    testWidgets('Test loadData', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      calendarPageState.loadData();
+      // tests involving updating events must use a new event, to not interfere with other tests, since they are async
+      final Event testEventLoadData = Event(
+        comment: 'LoadData Test comment',
+        fullDay: false,
+        startTime: DateTime.now(),
+        endTime: DateTime.now().add(const Duration(hours: 1)),
+        name: 'LoadData Test Event',
+        eventKey: 'LoadData TestKey',
+      );
+      // check list does not contain this event at first
+      expect(calendarPageState.eventList.contains(testEventLoadData), false);
+      // put testEventLoadData, check updated
+      mockHiveBox!.put('LoadData TestKey', testEventLoadData);
+      calendarPageState.loadData();
+      expect(calendarPageState.eventList.contains(testEventLoadData), true);
+      // remove after test done
+      mockHiveBox!.delete('LoadData TestKey');
+    });
+
+    testWidgets('Test getEventsForDay', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      final List<Event> eventList = calendarPageState.getEventsForDay(DateTime.now());
+      expect(eventList.contains(testEvent), true);
+    });
+
+    testWidgets('Test onDaySelected', (WidgetTester tester) async {
+      setScreenSize(tester);
+      await tester.pumpWidget(calendarPageMaterialApp!);
+      final CalendarPageState calendarPageState = tester.state(find.byType(CalendarPage));
+      int day = DateTime.now().day != 15 ? 15 : 16;
+      final DateTime newSelectedDay = DateTime(DateTime.now().year, DateTime.now().month, day);
+      expect(calendarPageState.selectedDay?.day == newSelectedDay.day, false);
+      expect(calendarPageState.focusedDay.day == newSelectedDay.day, false);
+      calendarPageState.onDaySelected(newSelectedDay, newSelectedDay);
+      expect(calendarPageState.selectedDay?.day == newSelectedDay.day, true);
+      expect(calendarPageState.focusedDay.day == newSelectedDay.day, true);
     });
   });
 }
