@@ -140,12 +140,13 @@ class CalendarPageState extends State<CalendarPage> {
                                 children: [
                                   Text(
                                     multiDayFormatter.format(selectedEvents![index].startTime),
-                                    style: TextStyle(fontSize: 8.0.sp),
+                                    style: TextStyle(fontSize: 9.0.sp),
                                   ),
-                                  Icon(Icons.arrow_downward, size: 4.0.w),
+                                  //Icon(Icons.arrow_downward, size: 4.0.w),
+                                  Text('-', style: TextStyle(fontSize: 6.0.sp)),
                                   Text(
                                     multiDayFormatter.format(selectedEvents![index].endTime),
-                                    style: TextStyle(fontSize: 8.0.sp),
+                                    style: TextStyle(fontSize: 9.0.sp),
                                   ),
                                 ],
                               )
