@@ -6,6 +6,9 @@ Project for familiarization with Flutter and Dart
 # Documentation
 run `dart pub global activate dhttpd`, followed by `dhttpd --path doc/api`
 
+<img src="https://github.com/Joshlim288/calendar_familiarization_project/blob/main/images/docs.png">
+
+
 # Testing
 To run all tests, use the command `flutter test --coverage`
 
